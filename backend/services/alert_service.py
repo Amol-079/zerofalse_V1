@@ -1,3 +1,4 @@
+from typing import Optional
 from ..database import get_database
 from ..models.alert import Alert
 from ..services.detection_engine import ScanResult
