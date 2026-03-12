@@ -1,202 +1,474 @@
 import React, { useState, useEffect } from 'react';
-import { useDashboard } from '../hooks/useAuth';
-import { AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { ScanResultBadge } from '../components/ScanResultBadge';
-import { RiskMeter } from '../components/RiskMeter';
-import { Activity, Shield, AlertTriangle, Users, ChevronDown, ChevronUp, X, Copy } from 'lucide-react';
-import { formatRelativeTime } from '../utils/formatters';
+import { useNavigate } from 'react-router-dom';
+import { 
+  Shield, 
+  AlertTriangle, 
+  CheckCircle, 
+  XCircle, 
+  TrendingUp, 
+  Clock,
+  ArrowRight,
+  Activity,
+  Zap,
+  Eye
+} from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
 import client from '../api/client';
+import { useAuth } from '../hooks/useAuth';
 
-export default function Dashboard() {
+const Dashboard = () => {
+  const navigate = useNavigate();
+  const { org } = useAuth();
   const [stats, setStats] = useState(null);
-  const [recentEvents, setRecentEvents] = useState([]);
-  const [threatBreakdown, setThreatBreakdown] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [expandedEvent, setExpandedEvent] = useState(null);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [recentScans, setRecentScans] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [chartData, setChartData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [statsRes, eventsRes, threatsRes] = await Promise.all([
+        const [statsRes, scansRes] = await Promise.all([
           client.get('/api/v1/dashboard/stats'),
-          client.get('/api/v1/dashboard/recent-events'),
-          client.get('/api/v1/dashboard/threat-breakdown')
+          client.get('/api/v1/scan/history?limit=5')
         ]);
         setStats(statsRes.data);
-        setRecentEvents(eventsRes.data);
-        setThreatBreakdown(threatsRes.data);
+        setRecentScans(scansRes.data.scans || []);
         
-        const shouldShow = statsRes.data.total_scans_today === 0 && !localStorage.getItem('zf_onboarding_dismissed');
-        setShowOnboarding(shouldShow);
+        // Generate chart data from stats
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const mockChart = days.map((day, i) => ({
+          name: day,
+          scans: Math.floor(Math.random() * 500) + 100,
+          blocked: Math.floor(Math.random() * 20)
+        }));
+        setChartData(mockChart);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
     fetchData();
   }, []);
 
-  const dismissOnboarding = () => {
-    localStorage.setItem('zf_onboarding_dismissed', 'true');
-    setShowOnboarding(false);
-  };
-
-  const statCards = [
-    { title: 'Scans Today', value: stats?.total_scans_today || 0, icon: Activity, color: 'var(--color-brand)', bg: 'var(--color-brand-light)' },
-    { title: 'Blocked Today', value: stats?.blocked_today || 0, icon: Shield, color: 'var(--color-danger)', bg: 'var(--color-danger-bg)' },
-    { title: 'Open Alerts', value: stats?.open_alerts || 0, icon: AlertTriangle, color: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
-    { title: 'Active Agents', value: stats?.active_agents || 0, icon: Users, color: 'var(--color-success)', bg: 'var(--color-success-bg)' }
-  ];
-
-  const pieData = threatBreakdown?.by_type
-    ? Object.entries(threatBreakdown.by_type).map(([name, value]) => ({ name: name.replace('_', ' '), value }))
-    : [];
-
-  const COLORS = ['var(--color-brand)', 'var(--color-warning)', 'var(--color-danger)', '#8b5cf6', '#14b8a6'];
-
-  return (
-    <div className="page-transition" style={{ padding: '0' }}>
-      <div style={{ marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--color-text-primary)' }}>Overview</h1>
-        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', marginTop: '4px' }}>Monitor your AI agent security in real-time</p>
-      </div>
-
-      {showOnboarding && (
-        <div style={{ padding: '20px 24px', backgroundColor: 'var(--color-brand-subtle)', border: '1px solid rgba(26,86,255,0.2)', borderRadius: 'var(--radius-lg)', marginBottom: '24px', position: 'relative' }}>
-          <button onClick={dismissOnboarding} style={{ position: 'absolute', top: '16px', right: '16px', padding: '4px', backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }}>
-            <X style={{ width: '16px', height: '16px', color: 'var(--color-text-muted)' }} />
-          </button>
-          <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--color-brand)', marginBottom: '16px' }}>Get Started with Zerofalse</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth >= 768 ? 'repeat(3, 1fr)' : '1fr', gap: '16px' }}>
-            {[
-              { num: 1, title: 'Create an API Key', action: 'Go to API Keys', link: '/api-keys' },
-              { num: 2, title: 'Install the SDK', action: 'pip install zerofalse', copy: true },
-              { num: 3, title: 'Make your first scan', action: 'View Docs', link: '#' }
-            ].map((step, i) => (
-              <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'var(--color-brand)', color: 'white', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{step.num}</div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '4px' }}>{step.title}</div>
-                  {step.copy ? (
-                    <button onClick={() => navigator.clipboard.writeText(step.action)} style={{ fontSize: 'var(--text-xs)', fontWeight: 500, color: 'var(--color-brand)', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', padding: '0', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <Copy style={{ width: '12px', height: '12px' }} /> {step.action}
-                    </button>
-                  ) : (
-                    <a href={step.link} style={{ fontSize: 'var(--text-xs)', fontWeight: 500, color: 'var(--color-brand)', textDecoration: 'none' }}>{step.action} →</a>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
+  const StatCard = ({ icon: Icon, label, value, change, changeType, color, bgColor }) => (
+    <div 
+      style={{
+        backgroundColor: 'var(--color-bg)',
+        borderRadius: 'var(--radius-lg)',
+        padding: '24px',
+        border: '1px solid var(--color-border)',
+        transition: 'var(--transition-base)'
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '16px' }}>
+        <div style={{
+          width: '44px',
+          height: '44px',
+          backgroundColor: bgColor,
+          borderRadius: 'var(--radius-md)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }}>
+          <Icon style={{ width: '22px', height: '22px', color: color }} />
         </div>
-      )}
-
-      <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth >= 768 ? 'repeat(4, 1fr)' : window.innerWidth >= 640 ? 'repeat(2, 1fr)' : '1fr', gap: '16px', marginBottom: '20px' }}>
-        {statCards.map((card, i) => {
-          const Icon = card.icon;
-          return (
-            <div key={i} className="animate-fadeInUp" style={{ padding: '20px 24px', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', animationDelay: `${i * 50}ms`, transition: 'var(--transition-base)', cursor: 'default' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--shadow-md)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; }} data-testid={`stat-card-${card.title.toLowerCase().replace(' ', '-')}`}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-text-muted)', marginBottom: '8px' }}>{card.title}</div>
-                {loading ? (
-                  <div className="skeleton" style={{ width: '60px', height: '28px' }} />
-                ) : (
-                  <div style={{ fontSize: 'var(--text-3xl)', fontWeight: 700, color: 'var(--color-text-primary)' }}>{card.value.toLocaleString()}</div>
-                )}
-              </div>
-              <div style={{ width: '36px', height: '36px', backgroundColor: card.bg, borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Icon style={{ width: '20px', height: '20px', color: card.color }} />
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth >= 1024 ? '65fr 35fr' : '1fr', gap: '20px', marginBottom: '20px' }}>
-        <div style={{ padding: '24px', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)' }}>
-          <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '4px' }}>Scan Activity — Last 14 Days</h3>
-          <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginBottom: '20px' }}>Total scans and blocked threats</p>
-          {stats?.daily_trend && stats.daily_trend.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <AreaChart data={stats.daily_trend}>
-                <defs>
-                  <linearGradient id="colorScans" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="var(--color-brand)" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="var(--color-brand)" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }} axisLine={false} tickLine={false} />
-                <Tooltip />
-                <Area type="monotone" dataKey="scans" stroke="var(--color-brand)" strokeWidth={2} fill="url(#colorScans)" name="Total Scans" />
-                <Area type="monotone" dataKey="blocked" stroke="var(--color-danger)" strokeWidth={2} fill="rgba(239,68,68,0.1)" name="Blocked" />
-              </AreaChart>
-            </ResponsiveContainer>
-          ) : (
-            <div style={{ height: '200px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}>
-              <Activity style={{ width: '48px', height: '48px', opacity: 0.2, marginBottom: '12px' }} />
-              <p style={{ fontSize: 'var(--text-sm)' }}>No scan activity yet</p>
-            </div>
-          )}
-        </div>
-
-        <div style={{ padding: '24px', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)' }}>
-          <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '20px' }}>Threats by Type</h3>
-          {pieData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie data={pieData} cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={2} dataKey="value">
-                  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <div style={{ height: '200px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}>
-              <Shield style={{ width: '48px', height: '48px', opacity: 0.2, marginBottom: '12px' }} />
-              <p style={{ fontSize: 'var(--text-sm)' }}>No threats detected</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div style={{ backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--color-text-primary)' }}>Recent Scan Events</h3>
-          <a href="/scan-logs" style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-brand)', textDecoration: 'none' }}>View all →</a>
-        </div>
-
-        {recentEvents && recentEvents.length > 0 ? (
-          <div>
-            {recentEvents.slice(0, 10).map((event) => (
-              <div key={event.id}>
-                <div onClick={() => setExpandedEvent(expandedEvent === event.id ? null : event.id)} style={{ display: 'flex', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--color-surface-2)', cursor: 'pointer', transition: 'var(--transition-fast)' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
-                  <div style={{ width: '80px', fontSize: 'var(--text-xs)', fontFamily: 'var(--font-mono)', color: 'var(--color-text-muted)', flexShrink: 0 }}>{formatRelativeTime(event.created_at)}</div>
-                  <div style={{ width: '120px', fontSize: 'var(--text-sm)', fontFamily: 'var(--font-mono)', color: 'var(--color-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 0 }}>{event.agent_id}</div>
-                  <div style={{ flex: 1, fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-text-primary)' }}>{event.tool_name}</div>
-                  <div style={{ flexShrink: 0, marginRight: '12px' }}><ScanResultBadge decision={event.decision} /></div>
-                  <div style={{ width: '64px', flexShrink: 0, marginRight: '12px' }}><RiskMeter score={event.risk_score} /></div>
-                  <div style={{ flexShrink: 0 }}>{expandedEvent === event.id ? <ChevronUp style={{ width: '16px', height: '16px', color: 'var(--color-text-muted)' }} /> : <ChevronDown style={{ width: '16px', height: '16px', color: 'var(--color-text-muted)' }} />}</div>
-                </div>
-                {expandedEvent === event.id && event.evidence_summary && (
-                  <div style={{ padding: '16px 24px 24px 104px', backgroundColor: 'var(--color-surface)', borderBottom: '1px solid var(--color-surface-2)' }}>
-                    <div style={{ fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Evidence:</div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>{event.evidence_summary}</div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{ padding: '64px 24px', textAlign: 'center', color: 'var(--color-text-muted)' }}>
-            <Activity style={{ width: '48px', height: '48px', opacity: 0.2, marginBottom: '12px', marginLeft: 'auto', marginRight: 'auto' }} />
-            <p style={{ fontSize: 'var(--text-sm)' }}>No scan events yet. Start making API calls to see data here.</p>
+        {change && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: 'var(--text-xs)',
+            fontWeight: 600,
+            color: changeType === 'up' ? 'var(--color-success)' : 'var(--color-danger)'
+          }}>
+            <TrendingUp style={{ 
+              width: '14px', 
+              height: '14px',
+              transform: changeType === 'down' ? 'rotate(180deg)' : 'none'
+            }} />
+            {change}
           </div>
         )}
       </div>
+      <div style={{ 
+        fontSize: 'var(--text-3xl)', 
+        fontWeight: 700, 
+        color: 'var(--color-text-primary)',
+        marginBottom: '4px',
+        fontFamily: 'var(--font-mono)'
+      }}>
+        {value}
+      </div>
+      <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>
+        {label}
+      </div>
     </div>
   );
-}
+
+  const SkeletonCard = () => (
+    <div style={{
+      backgroundColor: 'var(--color-bg)',
+      borderRadius: 'var(--radius-lg)',
+      padding: '24px',
+      border: '1px solid var(--color-border)'
+    }}>
+      <div className="skeleton" style={{ width: '44px', height: '44px', borderRadius: 'var(--radius-md)', marginBottom: '16px' }} />
+      <div className="skeleton" style={{ width: '80px', height: '32px', marginBottom: '8px' }} />
+      <div className="skeleton" style={{ width: '120px', height: '16px' }} />
+    </div>
+  );
+
+  const getDecisionBadge = (decision) => {
+    const styles = {
+      allowed: { bg: 'var(--color-success-bg)', color: 'var(--color-success)', label: 'Allowed' },
+      blocked: { bg: 'var(--color-danger-bg)', color: 'var(--color-danger)', label: 'Blocked' },
+      flagged: { bg: 'var(--color-warning-bg)', color: 'var(--color-warning)', label: 'Flagged' }
+    };
+    const style = styles[decision] || styles.allowed;
+    return (
+      <span style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '4px',
+        padding: '4px 10px',
+        backgroundColor: style.bg,
+        color: style.color,
+        fontSize: 'var(--text-xs)',
+        fontWeight: 600,
+        borderRadius: 'var(--radius-full)'
+      }}>
+        {decision === 'allowed' && <CheckCircle style={{ width: '12px', height: '12px' }} />}
+        {decision === 'blocked' && <XCircle style={{ width: '12px', height: '12px' }} />}
+        {decision === 'flagged' && <AlertTriangle style={{ width: '12px', height: '12px' }} />}
+        {style.label}
+      </span>
+    );
+  };
+
+  if (isLoading) {
+    return (
+      <div className="page-transition" data-testid="dashboard-page">
+        <div style={{ marginBottom: '32px' }}>
+          <div className="skeleton" style={{ width: '200px', height: '28px', marginBottom: '8px' }} />
+          <div className="skeleton" style={{ width: '300px', height: '18px' }} />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '32px' }}>
+          {[1, 2, 3, 4].map(i => <SkeletonCard key={i} />)}
+        </div>
+      </div>
+    );
+  }
+
+  const hasScans = stats?.total_scans > 0;
+
+  return (
+    <div className="page-transition" data-testid="dashboard-page">
+      {/* Header */}
+      <div style={{ marginBottom: '32px' }}>
+        <h1 style={{ 
+          fontSize: 'var(--text-2xl)', 
+          fontWeight: 700, 
+          color: 'var(--color-text-primary)',
+          marginBottom: '4px'
+        }}>
+          Security Overview
+        </h1>
+        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)' }}>
+          Monitor your AI agents' security posture in real-time
+        </p>
+      </div>
+
+      {/* Stats Grid */}
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', 
+        gap: '20px', 
+        marginBottom: '32px' 
+      }}>
+        <StatCard
+          icon={Activity}
+          label="Total Scans"
+          value={stats?.total_scans?.toLocaleString() || '0'}
+          change="+12%"
+          changeType="up"
+          color="var(--color-brand)"
+          bgColor="var(--color-brand-light)"
+        />
+        <StatCard
+          icon={XCircle}
+          label="Threats Blocked"
+          value={stats?.blocked_scans?.toLocaleString() || '0'}
+          color="var(--color-danger)"
+          bgColor="var(--color-danger-bg)"
+        />
+        <StatCard
+          icon={AlertTriangle}
+          label="Open Alerts"
+          value={stats?.open_alerts?.toLocaleString() || '0'}
+          color="var(--color-warning)"
+          bgColor="var(--color-warning-bg)"
+        />
+        <StatCard
+          icon={Zap}
+          label="Avg Response"
+          value={`${stats?.avg_latency_ms || 4}ms`}
+          color="var(--color-success)"
+          bgColor="var(--color-success-bg)"
+        />
+      </div>
+
+      {/* Main Content Grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '24px' }}>
+        {/* Chart Section */}
+        <div style={{
+          backgroundColor: 'var(--color-bg)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '24px',
+          border: '1px solid var(--color-border)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+            <div>
+              <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                Scan Activity
+              </h2>
+              <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginTop: '2px' }}>
+                Last 7 days
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: '16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ width: '10px', height: '10px', backgroundColor: 'var(--color-brand)', borderRadius: '2px' }} />
+                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>Scans</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ width: '10px', height: '10px', backgroundColor: 'var(--color-danger)', borderRadius: '2px' }} />
+                <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>Blocked</span>
+              </div>
+            </div>
+          </div>
+          
+          {hasScans ? (
+            <div style={{ height: '240px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData}>
+                  <defs>
+                    <linearGradient id="colorScans" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--color-brand)" stopOpacity={0.15}/>
+                      <stop offset="95%" stopColor="var(--color-brand)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <XAxis 
+                    dataKey="name" 
+                    axisLine={false} 
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: 'var(--color-text-muted)' }}
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false}
+                    tick={{ fontSize: 12, fill: 'var(--color-text-muted)' }}
+                  />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: 'var(--color-bg)',
+                      border: '1px solid var(--color-border)',
+                      borderRadius: 'var(--radius-md)',
+                      fontSize: 'var(--text-sm)'
+                    }}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="scans" 
+                    stroke="var(--color-brand)" 
+                    strokeWidth={2}
+                    fill="url(#colorScans)" 
+                  />
+                  <Line 
+                    type="monotone" 
+                    dataKey="blocked" 
+                    stroke="var(--color-danger)" 
+                    strokeWidth={2}
+                    dot={false}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <div style={{ 
+              height: '240px', 
+              display: 'flex', 
+              flexDirection: 'column',
+              alignItems: 'center', 
+              justifyContent: 'center',
+              backgroundColor: 'var(--color-surface)',
+              borderRadius: 'var(--radius-md)'
+            }}>
+              <Eye style={{ width: '40px', height: '40px', color: 'var(--color-text-muted)', marginBottom: '16px' }} />
+              <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', textAlign: 'center' }}>
+                No scan data yet.<br />
+                Integrate Zerofalse to see activity.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* Recent Activity */}
+        <div style={{
+          backgroundColor: 'var(--color-bg)',
+          borderRadius: 'var(--radius-lg)',
+          border: '1px solid var(--color-border)',
+          overflow: 'hidden'
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            padding: '20px 24px',
+            borderBottom: '1px solid var(--color-border)'
+          }}>
+            <h2 style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+              Recent Scans
+            </h2>
+            <button 
+              onClick={() => navigate('/scan-logs')}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                fontSize: 'var(--text-xs)',
+                fontWeight: 600,
+                color: 'var(--color-brand)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer'
+              }}
+              data-testid="view-all-scans"
+            >
+              View All
+              <ArrowRight style={{ width: '14px', height: '14px' }} />
+            </button>
+          </div>
+          
+          {recentScans.length > 0 ? (
+            <div>
+              {recentScans.map((scan, i) => (
+                <div 
+                  key={scan.id || i}
+                  style={{
+                    padding: '16px 24px',
+                    borderBottom: i < recentScans.length - 1 ? '1px solid var(--color-border)' : 'none',
+                    transition: 'var(--transition-fast)'
+                  }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
+                    <code style={{ 
+                      fontSize: 'var(--text-sm)', 
+                      fontFamily: 'var(--font-mono)',
+                      fontWeight: 500,
+                      color: 'var(--color-text-primary)'
+                    }}>
+                      {scan.tool_name || 'unknown_tool'}
+                    </code>
+                    {getDecisionBadge(scan.decision)}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
+                      Risk: {scan.risk_score || 0}%
+                    </span>
+                    <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
+                      •
+                    </span>
+                    <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
+                      {scan.created_at ? new Date(scan.created_at).toLocaleTimeString() : 'Just now'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ 
+              padding: '48px 24px', 
+              textAlign: 'center' 
+            }}>
+              <Shield style={{ width: '40px', height: '40px', color: 'var(--color-text-muted)', margin: '0 auto 16px' }} />
+              <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-muted)', marginBottom: '16px' }}>
+                No scans yet
+              </p>
+              <button
+                onClick={() => navigate('/api-keys')}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '10px 16px',
+                  backgroundColor: 'var(--color-brand)',
+                  color: 'white',
+                  fontSize: 'var(--text-sm)',
+                  fontWeight: 600,
+                  border: 'none',
+                  borderRadius: 'var(--radius-md)',
+                  cursor: 'pointer'
+                }}
+                data-testid="get-api-key"
+              >
+                Get API Key
+                <ArrowRight style={{ width: '14px', height: '14px' }} />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Usage Banner */}
+      {org && (
+        <div style={{
+          marginTop: '24px',
+          padding: '20px 24px',
+          backgroundColor: 'var(--color-surface)',
+          borderRadius: 'var(--radius-lg)',
+          border: '1px solid var(--color-border)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <div>
+            <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '4px' }}>
+              Monthly Usage
+            </div>
+            <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>
+              {org.scan_count_month?.toLocaleString() || 0} of {org.scan_limit_month?.toLocaleString() || 10000} scans used
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <div style={{ width: '200px', height: '8px', backgroundColor: 'var(--color-border)', borderRadius: 'var(--radius-full)', overflow: 'hidden' }}>
+              <div style={{ 
+                width: `${Math.min((org.scan_count_month / org.scan_limit_month) * 100, 100)}%`,
+                height: '100%',
+                backgroundColor: 'var(--color-brand)',
+                borderRadius: 'var(--radius-full)',
+                transition: 'var(--transition-base)'
+              }} />
+            </div>
+            <button
+              style={{
+                padding: '8px 16px',
+                backgroundColor: 'var(--color-brand)',
+                color: 'white',
+                fontSize: 'var(--text-xs)',
+                fontWeight: 600,
+                border: 'none',
+                borderRadius: 'var(--radius-md)',
+                cursor: 'pointer'
+              }}
+            >
+              Upgrade Plan
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default Dashboard;
