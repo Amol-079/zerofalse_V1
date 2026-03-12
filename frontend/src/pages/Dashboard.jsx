@@ -1,247 +1,199 @@
-import React, { useState } from 'react';
-import { useDashboard } from '../hooks/useDashboard';
-import { AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, Line } from 'recharts';
+import React, { useState, useEffect } from 'react';
+import { useDashboard } from '../hooks/useAuth';
+import { AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { ScanResultBadge } from '../components/ScanResultBadge';
 import { RiskMeter } from '../components/RiskMeter';
-import { Activity, Shield, AlertTriangle, Users, ChevronDown, ChevronUp } from 'lucide-react';
+import { Activity, Shield, AlertTriangle, Users, ChevronDown, ChevronUp, X, Copy } from 'lucide-react';
 import { formatRelativeTime } from '../utils/formatters';
+import client from '../api/client';
 
 export default function Dashboard() {
-  const { stats, recentEvents, threatBreakdown, loading } = useDashboard();
+  const [stats, setStats] = useState(null);
+  const [recentEvents, setRecentEvents] = useState([]);
+  const [threatBreakdown, setThreatBreakdown] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [expandedEvent, setExpandedEvent] = useState(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center">
-          <div className="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
-          <p className="text-gray-600">Loading dashboard...</p>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [statsRes, eventsRes, threatsRes] = await Promise.all([
+          client.get('/api/v1/dashboard/stats'),
+          client.get('/api/v1/dashboard/recent-events'),
+          client.get('/api/v1/dashboard/threat-breakdown')
+        ]);
+        setStats(statsRes.data);
+        setRecentEvents(eventsRes.data);
+        setThreatBreakdown(threatsRes.data);
+        
+        const shouldShow = statsRes.data.total_scans_today === 0 && !localStorage.getItem('zf_onboarding_dismissed');
+        setShowOnboarding(shouldShow);
+      } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
-  if (!stats) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-center max-w-md p-8 bg-white rounded-2xl border border-gray-200">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-            <Shield className="w-8 h-8 text-blue-600" />
-          </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>
-            Ready to Protect Your Agents
-          </h3>
-          <p className="text-gray-600 mb-6">
-            Create your first API key and start scanning tool calls
-          </p>
-          <button
-            onClick={() => window.location.href = '/api-keys'}
-            className="px-6 py-3 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-          >
-            Create API Key
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  const statCards = [
-    {
-      title: 'Scans Today',
-      value: stats.total_scans_today,
-      icon: Activity,
-      color: 'blue',
-    },
-    {
-      title: 'Blocked Today',
-      value: stats.blocked_today,
-      icon: Shield,
-      color: 'red',
-    },
-    {
-      title: 'Open Alerts',
-      value: stats.open_alerts,
-      icon: AlertTriangle,
-      color: 'amber',
-    },
-    {
-      title: 'Active Agents',
-      value: stats.active_agents,
-      icon: Users,
-      color: 'green',
-    },
-  ];
-
-  const colorMap = {
-    blue: { bg: 'bg-blue-100', text: 'text-blue-600', icon: 'text-blue-600' },
-    red: { bg: 'bg-red-100', text: 'text-red-600', icon: 'text-red-600' },
-    amber: { bg: 'bg-amber-100', text: 'text-amber-600', icon: 'text-amber-600' },
-    green: { bg: 'bg-green-100', text: 'text-green-600', icon: 'text-green-600' },
+  const dismissOnboarding = () => {
+    localStorage.setItem('zf_onboarding_dismissed', 'true');
+    setShowOnboarding(false);
   };
 
+  const statCards = [
+    { title: 'Scans Today', value: stats?.total_scans_today || 0, icon: Activity, color: 'var(--color-brand)', bg: 'var(--color-brand-light)' },
+    { title: 'Blocked Today', value: stats?.blocked_today || 0, icon: Shield, color: 'var(--color-danger)', bg: 'var(--color-danger-bg)' },
+    { title: 'Open Alerts', value: stats?.open_alerts || 0, icon: AlertTriangle, color: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
+    { title: 'Active Agents', value: stats?.active_agents || 0, icon: Users, color: 'var(--color-success)', bg: 'var(--color-success-bg)' }
+  ];
+
   const pieData = threatBreakdown?.by_type
-    ? Object.entries(threatBreakdown.by_type).map(([name, value]) => ({
-        name: name.replace('_', ' '),
-        value,
-      }))
+    ? Object.entries(threatBreakdown.by_type).map(([name, value]) => ({ name: name.replace('_', ' '), value }))
     : [];
 
-  const COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6'];
+  const COLORS = ['var(--color-brand)', 'var(--color-warning)', 'var(--color-danger)', '#8b5cf6', '#14b8a6'];
 
   return (
-    <div className="space-y-6" data-testid="dashboard-page">
-      <div>
-        <h1 className="text-3xl font-bold text-gray-900" style={{ fontFamily: 'Syne, sans-serif' }}>
-          Overview
-        </h1>
-        <p className="text-gray-600 mt-1">Monitor your AI agent security in real-time</p>
+    <div className="page-transition" style={{ padding: '0' }}>
+      <div style={{ marginBottom: '24px' }}>
+        <h1 style={{ fontSize: '18px', fontWeight: 600, color: 'var(--color-text-primary)' }}>Overview</h1>
+        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', marginTop: '4px' }}>Monitor your AI agent security in real-time</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {statCards.map((card) => {
-          const Icon = card.icon;
-          const colors = colorMap[card.color];
-          return (
-            <div
-              key={card.title}
-              className="bg-white p-6 rounded-xl border border-gray-200 hover:shadow-md transition-shadow"
-              data-testid={`stat-card-${card.title.toLowerCase().replace(' ', '-')}`}
-            >
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-medium text-gray-600">{card.title}</span>
-                <div className={`w-10 h-10 ${colors.bg} rounded-lg flex items-center justify-center`}>
-                  <Icon className={`w-5 h-5 ${colors.icon}`} />
+      {showOnboarding && (
+        <div style={{ padding: '20px 24px', backgroundColor: 'var(--color-brand-subtle)', border: '1px solid rgba(26,86,255,0.2)', borderRadius: 'var(--radius-lg)', marginBottom: '24px', position: 'relative' }}>
+          <button onClick={dismissOnboarding} style={{ position: 'absolute', top: '16px', right: '16px', padding: '4px', backgroundColor: 'transparent', border: 'none', cursor: 'pointer' }}>
+            <X style={{ width: '16px', height: '16px', color: 'var(--color-text-muted)' }} />
+          </button>
+          <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--color-brand)', marginBottom: '16px' }}>Get Started with Zerofalse</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth >= 768 ? 'repeat(3, 1fr)' : '1fr', gap: '16px' }}>
+            {[
+              { num: 1, title: 'Create an API Key', action: 'Go to API Keys', link: '/api-keys' },
+              { num: 2, title: 'Install the SDK', action: 'pip install zerofalse', copy: true },
+              { num: 3, title: 'Make your first scan', action: 'View Docs', link: '#' }
+            ].map((step, i) => (
+              <div key={i} style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                <div style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: 'var(--color-brand)', color: 'white', fontSize: '13px', fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>{step.num}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '4px' }}>{step.title}</div>
+                  {step.copy ? (
+                    <button onClick={() => navigator.clipboard.writeText(step.action)} style={{ fontSize: 'var(--text-xs)', fontWeight: 500, color: 'var(--color-brand)', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', padding: '0', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                      <Copy style={{ width: '12px', height: '12px' }} /> {step.action}
+                    </button>
+                  ) : (
+                    <a href={step.link} style={{ fontSize: 'var(--text-xs)', fontWeight: 500, color: 'var(--color-brand)', textDecoration: 'none' }}>{step.action} →</a>
+                  )}
                 </div>
               </div>
-              <div className="text-3xl font-bold text-gray-900" style={{ fontFamily: 'Syne, sans-serif' }}>
-                {card.value.toLocaleString()}
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth >= 768 ? 'repeat(4, 1fr)' : window.innerWidth >= 640 ? 'repeat(2, 1fr)' : '1fr', gap: '16px', marginBottom: '20px' }}>
+        {statCards.map((card, i) => {
+          const Icon = card.icon;
+          return (
+            <div key={i} className="animate-fadeInUp" style={{ padding: '20px 24px', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', animationDelay: `${i * 50}ms`, transition: 'var(--transition-base)', cursor: 'default' }} onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = 'var(--shadow-md)'; }} onMouseLeave={(e) => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.boxShadow = 'var(--shadow-sm)'; }} data-testid={`stat-card-${card.title.toLowerCase().replace(' ', '-')}`}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-text-muted)', marginBottom: '8px' }}>{card.title}</div>
+                {loading ? (
+                  <div className="skeleton" style={{ width: '60px', height: '28px' }} />
+                ) : (
+                  <div style={{ fontSize: 'var(--text-3xl)', fontWeight: 700, color: 'var(--color-text-primary)' }}>{card.value.toLocaleString()}</div>
+                )}
+              </div>
+              <div style={{ width: '36px', height: '36px', backgroundColor: card.bg, borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <Icon style={{ width: '20px', height: '20px', color: card.color }} />
               </div>
             </div>
           );
         })}
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white p-6 rounded-xl border border-gray-200">
-          <h3 className="text-lg font-bold text-gray-900 mb-6" style={{ fontFamily: 'Syne, sans-serif' }}>
-            Scan Activity — Last 14 Days
-          </h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={stats.daily_trend}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-              <XAxis dataKey="date" tick={{ fontSize: 12 }} stroke="#6b7280" />
-              <YAxis tick={{ fontSize: 12 }} stroke="#6b7280" />
-              <Tooltip />
-              <Legend />
-              <Area type="monotone" dataKey="scans" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.2} name="Total Scans" />
-              <Line type="monotone" dataKey="blocked" stroke="#ef4444" strokeWidth={2} name="Blocked" />
-            </AreaChart>
-          </ResponsiveContainer>
+      <div style={{ display: 'grid', gridTemplateColumns: window.innerWidth >= 1024 ? '65fr 35fr' : '1fr', gap: '20px', marginBottom: '20px' }}>
+        <div style={{ padding: '24px', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)' }}>
+          <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '4px' }}>Scan Activity — Last 14 Days</h3>
+          <p style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginBottom: '20px' }}>Total scans and blocked threats</p>
+          {stats?.daily_trend && stats.daily_trend.length > 0 ? (
+            <ResponsiveContainer width="100%" height={200}>
+              <AreaChart data={stats.daily_trend}>
+                <defs>
+                  <linearGradient id="colorScans" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--color-brand)" stopOpacity={0.2}/>
+                    <stop offset="95%" stopColor="var(--color-brand)" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
+                <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: 'var(--color-text-muted)' }} axisLine={false} tickLine={false} />
+                <Tooltip />
+                <Area type="monotone" dataKey="scans" stroke="var(--color-brand)" strokeWidth={2} fill="url(#colorScans)" name="Total Scans" />
+                <Area type="monotone" dataKey="blocked" stroke="var(--color-danger)" strokeWidth={2} fill="rgba(239,68,68,0.1)" name="Blocked" />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ height: '200px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}>
+              <Activity style={{ width: '48px', height: '48px', opacity: 0.2, marginBottom: '12px' }} />
+              <p style={{ fontSize: 'var(--text-sm)' }}>No scan activity yet</p>
+            </div>
+          )}
         </div>
 
-        <div className="bg-white p-6 rounded-xl border border-gray-200">
-          <h3 className="text-lg font-bold text-gray-900 mb-6" style={{ fontFamily: 'Syne, sans-serif' }}>
-            Threats by Type
-          </h3>
+        <div style={{ padding: '24px', backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)' }}>
+          <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--color-text-primary)', marginBottom: '20px' }}>Threats by Type</h3>
           {pieData.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height={200}>
               <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={90}
-                  paddingAngle={2}
-                  dataKey="value"
-                  label={(entry) => entry.name}
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
+                <Pie data={pieData} cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={2} dataKey="value">
+                  {pieData.map((entry, index) => <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}
                 </Pie>
                 <Tooltip />
               </PieChart>
             </ResponsiveContainer>
           ) : (
-            <div className="h-[300px] flex items-center justify-center text-gray-500">
-              <p>No threat data yet</p>
+            <div style={{ height: '200px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text-muted)' }}>
+              <Shield style={{ width: '48px', height: '48px', opacity: 0.2, marginBottom: '12px' }} />
+              <p style={{ fontSize: 'var(--text-sm)' }}>No threats detected</p>
             </div>
           )}
         </div>
       </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <div className="p-6 border-b border-gray-200">
-          <h3 className="text-lg font-bold text-gray-900" style={{ fontFamily: 'Syne, sans-serif' }}>
-            Recent Scan Events
-          </h3>
+      <div style={{ backgroundColor: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: 'var(--radius-lg)', boxShadow: 'var(--shadow-sm)', overflow: 'hidden' }}>
+        <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h3 style={{ fontSize: 'var(--text-base)', fontWeight: 600, color: 'var(--color-text-primary)' }}>Recent Scan Events</h3>
+          <a href="/scan-logs" style={{ fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-brand)', textDecoration: 'none' }}>View all →</a>
         </div>
 
         {recentEvents && recentEvents.length > 0 ? (
-          <div className="overflow-x-auto">
-            <table className="w-full" data-testid="recent-events-table">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Time</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Agent ID</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Tool Name</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Decision</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Severity</th>
-                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Risk Score</th>
-                  <th className="px-6 py-3"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {recentEvents.slice(0, 10).map((event) => (
-                  <React.Fragment key={event.id}>
-                    <tr
-                      className="hover:bg-gray-50 cursor-pointer"
-                      onClick={() => setExpandedEvent(expandedEvent === event.id ? null : event.id)}
-                    >
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {formatRelativeTime(event.created_at)}
-                      </td>
-                      <td className="px-6 py-4 text-sm font-mono text-gray-900">{event.agent_id}</td>
-                      <td className="px-6 py-4 text-sm font-medium text-gray-900">{event.tool_name}</td>
-                      <td className="px-6 py-4">
-                        <ScanResultBadge decision={event.decision} />
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-sm capitalize text-gray-700">{event.severity}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="w-32">
-                          <RiskMeter score={event.risk_score} />
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        {expandedEvent === event.id ? (
-                          <ChevronUp className="w-5 h-5 text-gray-400" />
-                        ) : (
-                          <ChevronDown className="w-5 h-5 text-gray-400" />
-                        )}
-                      </td>
-                    </tr>
-                    {expandedEvent === event.id && event.evidence_summary && (
-                      <tr>
-                        <td colSpan="7" className="px-6 py-4 bg-gray-50">
-                          <div className="text-sm">
-                            <div className="font-semibold text-gray-700 mb-2">Evidence:</div>
-                            <div className="text-gray-600 pl-4">{event.evidence_summary}</div>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
+          <div>
+            {recentEvents.slice(0, 10).map((event) => (
+              <div key={event.id}>
+                <div onClick={() => setExpandedEvent(expandedEvent === event.id ? null : event.id)} style={{ display: 'flex', alignItems: 'center', padding: '12px 24px', borderBottom: '1px solid var(--color-surface-2)', cursor: 'pointer', transition: 'var(--transition-fast)' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface)'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
+                  <div style={{ width: '80px', fontSize: 'var(--text-xs)', fontFamily: 'var(--font-mono)', color: 'var(--color-text-muted)', flexShrink: 0 }}>{formatRelativeTime(event.created_at)}</div>
+                  <div style={{ width: '120px', fontSize: 'var(--text-sm)', fontFamily: 'var(--font-mono)', color: 'var(--color-text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flexShrink: 0 }}>{event.agent_id}</div>
+                  <div style={{ flex: 1, fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-text-primary)' }}>{event.tool_name}</div>
+                  <div style={{ flexShrink: 0, marginRight: '12px' }}><ScanResultBadge decision={event.decision} /></div>
+                  <div style={{ width: '64px', flexShrink: 0, marginRight: '12px' }}><RiskMeter score={event.risk_score} /></div>
+                  <div style={{ flexShrink: 0 }}>{expandedEvent === event.id ? <ChevronUp style={{ width: '16px', height: '16px', color: 'var(--color-text-muted)' }} /> : <ChevronDown style={{ width: '16px', height: '16px', color: 'var(--color-text-muted)' }} />}</div>
+                </div>
+                {expandedEvent === event.id && event.evidence_summary && (
+                  <div style={{ padding: '16px 24px 24px 104px', backgroundColor: 'var(--color-surface)', borderBottom: '1px solid var(--color-surface-2)' }}>
+                    <div style={{ fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '8px' }}>Evidence:</div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-xs)', color: 'var(--color-text-secondary)' }}>{event.evidence_summary}</div>
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         ) : (
-          <div className="p-12 text-center text-gray-500">
-            <Activity className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <p>No scan events yet. Start making API calls to see data here.</p>
+          <div style={{ padding: '64px 24px', textAlign: 'center', color: 'var(--color-text-muted)' }}>
+            <Activity style={{ width: '48px', height: '48px', opacity: 0.2, marginBottom: '12px', marginLeft: 'auto', marginRight: 'auto' }} />
+            <p style={{ fontSize: 'var(--text-sm)' }}>No scan events yet. Start making API calls to see data here.</p>
           </div>
         )}
       </div>
