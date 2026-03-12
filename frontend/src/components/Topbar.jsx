@@ -3,6 +3,7 @@ import { useAuth } from '../hooks/useAuth';
 import { Bell, User, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
+import { DarkModeToggle } from './DarkModeToggle';
 
 export const Topbar = () => {
   const { user, org, logout } = useAuth();
@@ -46,7 +47,8 @@ export const Topbar = () => {
         padding: '0 24px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between'
+        justifyContent: 'space-between',
+        transition: 'background-color 0.2s ease'
       }}
       data-testid="topbar"
     >
@@ -57,6 +59,7 @@ export const Topbar = () => {
       </div>
       
       <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        {/* Notifications */}
         <button
           onClick={() => navigate('/alerts')}
           style={{
@@ -74,6 +77,7 @@ export const Topbar = () => {
           }}
           onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface-2)'}
           onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+          data-testid="notifications-btn"
         >
           <Bell style={{ width: '20px', height: '20px', color: 'var(--color-text-secondary)' }} />
           {openAlerts > 0 && (
@@ -89,8 +93,12 @@ export const Topbar = () => {
           )}
         </button>
 
+        {/* Dark Mode Toggle */}
+        <DarkModeToggle />
+
         <div style={{ width: '1px', height: '20px', backgroundColor: 'var(--color-border)' }} />
 
+        {/* User Menu */}
         <div style={{ position: 'relative' }}>
           <div 
             onClick={() => setShowDropdown(!showDropdown)}
@@ -105,6 +113,7 @@ export const Topbar = () => {
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-surface)'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            data-testid="user-menu"
           >
             <div style={{
               width: '32px',
@@ -200,3 +209,5 @@ export const Topbar = () => {
     </header>
   );
 };
+
+export default Topbar;
