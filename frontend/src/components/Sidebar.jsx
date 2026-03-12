@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Home, FileText, Bell, Key, Settings, Shield } from 'lucide-react';
+import { Home, FileText, Bell, Key, Settings, Shield, Sparkles, BookOpen } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import client from '../api/client';
 
@@ -25,6 +25,8 @@ export const Sidebar = () => {
     { path: '/scan-logs', icon: FileText, label: 'Scan Logs' },
     { path: '/alerts', icon: Bell, label: 'Alerts', badge: alertCount },
     { path: '/keys', icon: Key, label: 'API Keys' },
+    { path: '/ai-config', icon: Sparkles, label: 'AI Config' },
+    { path: '/docs', icon: BookOpen, label: 'Docs' },
     { path: '/settings', icon: Settings, label: 'Settings' },
   ];
 
@@ -40,7 +42,8 @@ export const Sidebar = () => {
         width: '240px', 
         backgroundColor: 'var(--color-bg)', 
         borderRight: '1px solid var(--color-border)',
-        height: '100vh'
+        height: '100vh',
+        transition: 'background-color 0.2s ease'
       }}
       data-testid="sidebar"
     >
@@ -162,3 +165,5 @@ export const Sidebar = () => {
     </aside>
   );
 };
+
+export default Sidebar;
