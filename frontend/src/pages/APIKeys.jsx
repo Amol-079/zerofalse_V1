@@ -33,7 +33,8 @@ const APIKeys = () => {
     setIsLoading(true);
     try {
       const response = await client.get('/api/v1/keys/');
-      setKeys(response.data.keys || []);
+      // Backend returns array directly, not wrapped in {keys: [...]}
+      setKeys(Array.isArray(response.data) ? response.data : (response.data.keys || []));
     } catch (error) {
       console.error('Error fetching API keys:', error);
     } finally {
