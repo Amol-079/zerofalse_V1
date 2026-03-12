@@ -8,13 +8,6 @@
 ## Problem Statement
 AI agents executing tool calls can be exploited through prompt injection, credential theft, and shell injection attacks. Zerofalse provides real-time inspection of every tool call to detect and block threats before they reach production systems.
 
-## Core Features
-- **Real-time Tool Call Inspection**: Monitor every tool call in milliseconds with zero latency impact
-- **Threat Detection**: Catch prompt injection, credential theft, and shell injection
-- **Policy Enforcement**: Define granular policies to allow, block, or alert on specific tool behaviors
-- **Instant Alerts**: Get notified immediately when suspicious activity is detected
-- **Dashboard Analytics**: Monitor security posture with charts and statistics
-
 ---
 
 ## Technical Architecture
@@ -35,7 +28,7 @@ AI agents executing tool calls can be exploited through prompt injection, creden
 │   ├── models/
 │   ├── routers/
 │   ├── services/
-│   │   └── detection_engine.py  # Core security logic
+│   │   └── detection_engine.py
 │   ├── middleware/
 │   └── schemas/
 └── frontend/
@@ -44,19 +37,24 @@ AI agents executing tool calls can be exploited through prompt injection, creden
     │   ├── components/
     │   │   ├── Layout.jsx
     │   │   ├── Sidebar.jsx
-    │   │   └── Topbar.jsx
+    │   │   ├── Topbar.jsx
+    │   │   └── DarkModeToggle.jsx
     │   ├── context/AuthContext.jsx
     │   ├── hooks/
+    │   │   ├── useAuth.js
+    │   │   └── useTheme.js
     │   ├── pages/
-    │   │   ├── Landing.jsx
+    │   │   ├── Landing.jsx (7 sections)
     │   │   ├── Signup.jsx
     │   │   ├── Login.jsx
     │   │   ├── Dashboard.jsx
     │   │   ├── ScanLogs.jsx
     │   │   ├── Alerts.jsx
     │   │   ├── APIKeys.jsx
-    │   │   └── Settings.jsx
-    │   └── index.css  # Design system
+    │   │   ├── Settings.jsx
+    │   │   ├── AIConfig.jsx (NEW)
+    │   │   └── Docs.jsx (NEW)
+    │   └── index.css (with dark mode)
     └── package.json
 ```
 
@@ -80,35 +78,50 @@ AI agents executing tool calls can be exploited through prompt injection, creden
 
 ## Completed Work
 
-### December 2025 - UI/UX Complete Overhaul
+### December 2025 - Major UI/UX Overhaul
 
-#### Design System Implementation
+#### Landing Page - 7 Complete Sections
+1. **Hero Section** - Two-column layout with animated dashboard preview, stats bar, dual CTAs
+2. **How It Works** - 4-step visual flow with numbered cards and connecting arrows
+3. **Problem Section** - Dark navy background with 4 threat cards (Prompt Injection, Credential Theft, Shell Injection, Memory Poisoning)
+4. **Solution Section** - Interactive demo widget with Safe/Attack tab switching, live scan results
+5. **Dashboard Preview** - Full dashboard mockup with floating animation, animated stat counters
+6. **Pricing Section** - 3 plans (Free, Starter, Growth) with Monthly/Annual toggle and "Save 20%" badge
+7. **FAQ Section** - 7-question accordion with expand/collapse functionality
+8. **Final CTA** - Dark gradient section with decorative blur circles
+9. **Footer** - 4-column layout with Product, Resources, Company links and social icons
+
+#### Dashboard Features
+- **Dark Mode Toggle** - In Topbar, stores preference in localStorage, applies via data-theme attribute
+- **AI Config Page** (`/ai-config`) - Model selection (Claude, GPT-4o, Gemini, Custom), API key configuration, detection performance stats
+- **Docs Page** (`/docs`) - Full documentation with sticky TOC sidebar, code blocks with copy buttons, comprehensive SDK and API reference
+
+#### Design System
 - CSS variables for colors, typography, spacing, shadows
+- Dark mode variables with smooth transitions
+- Scroll animations with Intersection Observer
 - Font: Inter for UI, JetBrains Mono for code
 - 8px spacing grid
-- Shadow elevation system
 
-#### Pages Completed (All 8 pages)
-1. **Landing.jsx** - Hero section, features grid, stats, code preview, CTA
-2. **Signup.jsx** - Split layout with branding, benefits, testimonial
-3. **Login.jsx** - Split layout with stats, Google SSO button
-4. **Dashboard.jsx** - Stats cards, area chart, recent scans list, usage bar
-5. **ScanLogs.jsx** - Searchable table, filter dropdowns, expandable rows
-6. **Alerts.jsx** - Status stats, filter options, detail modal
-7. **APIKeys.jsx** - Create/revoke keys, copy functionality, security warnings
-8. **Settings.jsx** - 5-tab layout (Profile, Organization, Notifications, Security, Billing)
-
-#### Components Completed
-- `Layout.jsx` - Main app shell with sidebar
-- `Sidebar.jsx` - Navigation with active states, usage indicator
-- `Topbar.jsx` - User dropdown, notifications
+#### Pages Completed (All 10 pages)
+1. Landing.jsx - 7 sections with animations
+2. Signup.jsx - Split layout with branding
+3. Login.jsx - Split layout with stats
+4. Dashboard.jsx - Stats cards, charts, recent scans
+5. ScanLogs.jsx - Searchable table with filters
+6. Alerts.jsx - Status stats, filter options, detail modal
+7. APIKeys.jsx - Create/revoke modals, copy functionality
+8. Settings.jsx - 5-tab layout
+9. AIConfig.jsx - AI model configuration (NEW)
+10. Docs.jsx - Documentation with TOC (NEW)
 
 #### Testing Status
-- ✅ Frontend testing: 100% pass rate
-- ✅ All 8 pages render correctly
-- ✅ Navigation and routing working
-- ✅ Protected routes redirect properly
-- ✅ Forms accept input and display validation
+- ✅ All 7 landing page sections render correctly
+- ✅ Interactive elements (pricing toggle, FAQ accordion, demo widget tabs) work
+- ✅ Dark mode toggle present and functional
+- ✅ New AI Config and Docs pages fully functional
+- ✅ All existing pages still work
+- ✅ Navigation between all pages works
 
 ---
 
@@ -121,32 +134,21 @@ AI agents executing tool calls can be exploited through prompt injection, creden
 - [ ] Create docker-compose.yml for containerization
 - [ ] Create nginx/nginx.conf for proxy configuration
 - [ ] End-to-end flow testing (signup → API key → scan)
+- [ ] Connect AI Config page to actual AI model APIs
 
 ### P2 - Medium Priority
 - [ ] Refactor rate limiting to use Redis (currently in-memory)
 - [ ] Implement email sending for password resets
 - [ ] Implement webhook sending logic for alerts
-- [ ] Add data-testid to all interactive elements
+- [ ] Mobile responsive improvements
 
 ### P3 - Low Priority
 - [ ] Two-factor authentication
 - [ ] Session management UI
 - [ ] Export functionality for scan logs
-- [ ] Responsive design improvements for mobile
+- [ ] Complete all Docs page sections
 
 ---
-
-## Known Limitations
-1. **Rate Limiting**: Currently using in-memory dictionary instead of Redis
-2. **Email**: Password reset only logs token, no actual email sent
-3. **Webhooks**: API endpoints exist but trigger logic not implemented
-4. **2FA**: Marked as "Coming Soon" in Settings UI
-
----
-
-## URLs
-- Frontend: https://secure-agents-2.preview.emergentagent.com
-- API Base: https://secure-agents-2.preview.emergentagent.com/api/v1
 
 ## Route Mapping
 | Route | Page | Auth Required |
@@ -160,4 +162,21 @@ AI agents executing tool calls can be exploited through prompt injection, creden
 | /scan-logs | ScanLogs | Yes |
 | /alerts | Alerts | Yes |
 | /keys | APIKeys | Yes |
+| /ai-config | AIConfig | Yes |
+| /docs | Docs | Yes |
 | /settings | Settings | Yes |
+
+---
+
+## Known Limitations
+1. **Rate Limiting**: Currently using in-memory dictionary instead of Redis
+2. **Email**: Password reset only logs token, no actual email sent
+3. **Webhooks**: API endpoints exist but trigger logic not implemented
+4. **2FA**: Marked as "Coming Soon" in Settings UI
+5. **AI Config**: Model API connections are UI-only (not connected to backend yet)
+
+---
+
+## URLs
+- Frontend: https://secure-agents-2.preview.emergentagent.com
+- API Base: https://secure-agents-2.preview.emergentagent.com/api/v1
