@@ -68,9 +68,9 @@ export default function Settings() {
         <p className="text-gray-600 mt-1">Manage your account and preferences</p>
       </div>
 
-      <div className=\"flex gap-6\">
-        <div className=\"w-64 bg-white rounded-xl border border-gray-200 p-4 h-fit\">
-          <nav className=\"space-y-1\">
+      <div className="flex gap-6">
+        <div className="w-64 bg-white rounded-xl border border-gray-200 p-4 h-fit">
+          <nav className="space-y-1">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -84,7 +84,7 @@ export default function Settings() {
                   }`}
                   data-testid={`settings-tab-${tab.id}`}
                 >
-                  <Icon className=\"w-5 h-5\" />
+                  <Icon className="w-5 h-5" />
                   {tab.label}
                 </button>
               );
@@ -92,89 +92,91 @@ export default function Settings() {
           </nav>
         </div>
 
-        <div className=\"flex-1 bg-white rounded-xl border border-gray-200 p-8\">
+        <div className="flex-1 bg-white rounded-xl border border-gray-200 p-8">
           {activeTab === 'profile' && (
             <div>
-              <h2 className=\"text-xl font-bold text-gray-900 mb-6\" style={{ fontFamily: 'Syne, sans-serif' }}>
+              <h2 className="text-xl font-bold text-gray-900 mb-6" style={{ fontFamily: 'Syne, sans-serif' }}>
                 Profile Settings
               </h2>
 
-              <div className=\"space-y-6 mb-8\">
+              <div className="space-y-6 mb-8">
                 <div>
-                  <label className=\"block text-sm font-medium text-gray-700 mb-2\">Full Name</label>\n                  <input
-                    type=\"text\"
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+                  <input
+                    type="text"
                     defaultValue={user?.full_name || ''}
-                    className=\"w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent\"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                     disabled
                   />
                 </div>
 
                 <div>
-                  <label className=\"block text-sm font-medium text-gray-700 mb-2\">Email</label>\n                  <input
-                    type=\"email\"
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+                  <input
+                    type="email"
                     defaultValue={user?.email || ''}
-                    className=\"w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50\"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50"
                     disabled
                   />
                 </div>
               </div>
 
-              <div className=\"border-t border-gray-200 pt-8\">
-                <h3 className=\"text-lg font-semibold text-gray-900 mb-6\">Change Password</h3>
+              <div className="border-t border-gray-200 pt-8">
+                <h3 className="text-lg font-semibold text-gray-900 mb-6">Change Password</h3>
 
                 {success && (
-                  <div className=\"mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3\">
-                    <CheckCircle className=\"w-5 h-5 text-green-600 flex-shrink-0\" />
-                    <span className=\"text-sm text-green-800\">{success}</span>
+                  <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0" />
+                    <span className="text-sm text-green-800">{success}</span>
                   </div>
                 )}
 
                 {error && (
-                  <div className=\"mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3\">
-                    <AlertCircle className=\"w-5 h-5 text-red-600 flex-shrink-0\" />
-                    <span className=\"text-sm text-red-800\">{error}</span>
+                  <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+                    <span className="text-sm text-red-800">{error}</span>
                   </div>
                 )}
 
-                <form onSubmit={handleChangePassword} className=\"space-y-5\">
+                <form onSubmit={handleChangePassword} className="space-y-5">
                   <div>
-                    <label className=\"block text-sm font-medium text-gray-700 mb-2\">Current Password</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
                     <input
-                      type=\"password\"
+                      type="password"
                       value={passwordData.current_password}
                       onChange={(e) => setPasswordData({ ...passwordData, current_password: e.target.value })}
-                      className=\"w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent\"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className=\"block text-sm font-medium text-gray-700 mb-2\">New Password</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
                     <input
-                      type=\"password\"
+                      type="password"
                       value={passwordData.new_password}
                       onChange={(e) => setPasswordData({ ...passwordData, new_password: e.target.value })}
-                      className=\"w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent\"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className=\"block text-sm font-medium text-gray-700 mb-2\">Confirm New Password</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
                     <input
-                      type=\"password\"
+                      type="password"
                       value={passwordData.confirm_password}
                       onChange={(e) => setPasswordData({ ...passwordData, confirm_password: e.target.value })}
-                      className=\"w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent\"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                       required
                     />
                   </div>
 
                   <button
-                    type=\"submit\"
+                    type="submit"
                     disabled={loading}
-                    className=\"px-6 py-3 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50\"
-                    data-testid=\"change-password-btn\"
+                    className="px-6 py-3 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
+                    data-testid="change-password-btn"
                   >
                     {loading ? 'Updating...' : 'Update Password'}
                   </button>
@@ -185,31 +187,31 @@ export default function Settings() {
 
           {activeTab === 'organization' && (
             <div>
-              <h2 className=\"text-xl font-bold text-gray-900 mb-6\" style={{ fontFamily: 'Syne, sans-serif' }}>
+              <h2 className="text-xl font-bold text-gray-900 mb-6" style={{ fontFamily: 'Syne, sans-serif' }}>
                 Organization Settings
               </h2>
 
-              <div className=\"space-y-6\">
+              <div className="space-y-6">
                 <div>
-                  <label className=\"block text-sm font-medium text-gray-700 mb-2\">Organization Name</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Organization Name</label>
                   <input
-                    type=\"text\"
+                    type="text"
                     defaultValue={org?.name || ''}
-                    className=\"w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50\"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-50"
                     disabled
                   />
                 </div>
 
                 <div>
-                  <label className=\"block text-sm font-medium text-gray-700 mb-2\">Plan</label>
-                  <div className=\"px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 capitalize font-semibold\">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Plan</label>
+                  <div className="px-4 py-3 border border-gray-300 rounded-lg bg-gray-50 capitalize font-semibold">
                     {org?.plan || 'free'}
                   </div>
                 </div>
 
                 <div>
-                  <label className=\"block text-sm font-medium text-gray-700 mb-2\">Scan Quota</label>
-                  <div className=\"px-4 py-3 border border-gray-300 rounded-lg bg-gray-50\">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Scan Quota</label>
+                  <div className="px-4 py-3 border border-gray-300 rounded-lg bg-gray-50">
                     {org?.scan_count_month?.toLocaleString() || 0} / {org?.scan_limit_month?.toLocaleString() || 0} scans this month
                   </div>
                 </div>
@@ -219,27 +221,65 @@ export default function Settings() {
 
           {activeTab === 'notifications' && (
             <div>
-              <h2 className=\"text-xl font-bold text-gray-900 mb-6\" style={{ fontFamily: 'Syne, sans-serif' }}>
+              <h2 className="text-xl font-bold text-gray-900 mb-6" style={{ fontFamily: 'Syne, sans-serif' }}>
                 Webhook Configuration
               </h2>
 
-              <form className=\"space-y-6\">
+              <form className="space-y-6">
                 <div>
-                  <label className=\"block text-sm font-medium text-gray-700 mb-2\">Webhook URL</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Webhook URL</label>
                   <input
-                    type=\"url\"
+                    type="url"
                     value={webhookData.url}
                     onChange={(e) => setWebhookData({ ...webhookData, url: e.target.value })}
-                    placeholder=\"https://your-app.com/webhooks/zerofalse\"
-                    className=\"w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent\"
+                    placeholder="https://your-app.com/webhooks/zerofalse"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
                   />
                 </div>
 
                 <div>
-                  <label className=\"block text-sm font-medium text-gray-700 mb-3\">Event Types</label>
-                  <div className=\"space-y-2\">
-                    {['scan.blocked', 'alert.critical', 'alert.high', 'quota.warning'].map((event) => (\n                      <label key={event} className=\"flex items-center gap-3 cursor-pointer\">\n                        <input\n                          type=\"checkbox\"
-                          checked={webhookData.events.includes(event)}\n                          onChange={(e) => {\n                            if (e.target.checked) {\n                              setWebhookData({ ...webhookData, events: [...webhookData.events, event] });\n                            } else {\n                              setWebhookData({\n                                ...webhookData,\n                                events: webhookData.events.filter((ev) => ev !== event),\n                              });\n                            }\n                          }}\n                          className=\"w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-600\"\n                        />\n                        <span className=\"text-sm text-gray-700\">{event}</span>\n                      </label>\n                    ))}\n                  </div>\n                </div>\n\n                <div className=\"flex gap-3\">\n                  <button\n                    type=\"button\"\n                    className=\"px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors\"\n                  >\n                    Test Webhook\n                  </button>\n                  <button\n                    type=\"submit\"\n                    className=\"px-6 py-3 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors\"\n                  >\n                    Save Configuration\n                  </button>\n                </div>\n              </form>\n            </div>\n          )}
+                  <label className="block text-sm font-medium text-gray-700 mb-3">Event Types</label>
+                  <div className="space-y-2">
+                    {['scan.blocked', 'alert.critical', 'alert.high', 'quota.warning'].map((event) => (
+                      <label key={event} className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={webhookData.events.includes(event)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setWebhookData({ ...webhookData, events: [...webhookData.events, event] });
+                            } else {
+                              setWebhookData({
+                                ...webhookData,
+                                events: webhookData.events.filter((ev) => ev !== event),
+                              });
+                            }
+                          }}
+                          className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-600"
+                        />
+                        <span className="text-sm text-gray-700">{event}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    className="px-6 py-3 text-sm font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                  >
+                    Test Webhook
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-6 py-3 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                  >
+                    Save Configuration
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
         </div>
       </div>
     </div>
