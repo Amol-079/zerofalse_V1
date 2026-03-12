@@ -68,7 +68,8 @@
   }
   
   body {
-    @apply bg-white text-gray-900;
+    @apply bg-white;
+    color: var(--text-1);
     font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -76,10 +77,59 @@
 
   h1, h2, h3, h4, h5, h6 {
     font-family: 'Syne', sans-serif;
+    color: var(--text-1);
   }
 
   code, pre {
     font-family: 'JetBrains Mono', 'Courier New', monospace;
+  }
+  
+  input, select, textarea {
+    box-shadow: var(--shadow-1);
+  }
+  
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--brand-500);
+    background-color: var(--brand-50);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+}
+
+@layer utilities {
+  .animate-shimmer {
+    animation: shimmer 2s infinite;
+    background: linear-gradient(
+      90deg,
+      var(--surface-2) 0%,
+      var(--surface) 50%,
+      var(--surface-2) 100%
+    );
+    background-size: 200% 100%;
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+  
+  .page-transition {
+    animation: pageIn 200ms ease-out;
+  }
+  
+  @keyframes pageIn {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }
 
