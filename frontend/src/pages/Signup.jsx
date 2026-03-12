@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { Shield, CheckCircle, AlertCircle } from 'lucide-react';
+import { Shield, Check, AlertCircle, Eye, EyeOff } from 'lucide-react';
 import { validateEmail, validatePassword, getPasswordStrength } from '../utils/validators';
 
 export default function Signup() {
@@ -15,8 +15,11 @@ export default function Signup() {
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const passwordStrength = getPasswordStrength(formData.password);
+  const strengthColors = { weak: '#ef4444', medium: '#f59e0b', strong: '#10b981' };
+  const strengthSegments = passwordStrength.level === 'weak' ? 1 : passwordStrength.level === 'medium' ? 2 : 4;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,131 +50,144 @@ export default function Signup() {
   };
 
   return (
-    <div className="min-h-screen flex">
-      <div className="flex-1 bg-gradient-to-br from-blue-600 to-blue-800 p-12 flex flex-col justify-center text-white">
-        <div className="max-w-md">
-          <div className="flex items-center gap-2 mb-8">
-            <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-              <Shield className="w-6 h-6 text-white" />
+    <div style={{ display: 'flex', minHeight: '100vh' }}>
+      <div style={{ width: window.innerWidth >= 768 ? '45%' : '0', background: 'linear-gradient(135deg, var(--color-navy) 0%, var(--color-navy-light) 100%)', padding: window.innerWidth >= 768 ? '48px' : '0', display: window.innerWidth >= 768 ? 'flex' : 'none', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '48px' }}>
+            <div style={{ width: '24px', height: '24px', backgroundColor: 'white', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Shield style={{ width: '16px', height: '16px', color: 'var(--color-brand)' }} />
             </div>
-            <span className="text-2xl font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>Zerofalse</span>
+            <span style={{ fontFamily: 'var(--font-sans)', fontSize: '20px', fontWeight: 700, color: 'white' }}>Zerofalse</span>
           </div>
-          
-          <h2 className="text-3xl font-bold mb-6" style={{ fontFamily: 'Syne, sans-serif' }}>
-            Protect Your AI Agents
-          </h2>
-          
-          <ul className="space-y-4">
+          <h2 style={{ fontSize: '28px', fontWeight: 700, color: 'white', marginBottom: '16px' }}>Protect Your AI Agents</h2>
+          <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.7)', lineHeight: 1.7, marginBottom: '32px' }}>Real-time security for every tool call your agents make.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
             {[
               'Real-time tool call inspection',
-              'Block attacks in < 2ms',
-              'Works with any agent framework',
-              'No code changes required',
-            ].map((benefit, idx) => (
-              <li key={idx} className="flex items-center gap-3">
-                <CheckCircle className="w-5 h-5 flex-shrink-0" />
-                <span>{benefit}</span>
-              </li>
+              'Blocks attacks in < 2ms',
+              'Works with LangChain, CrewAI, AutoGen',
+              'Zero infrastructure changes'
+            ].map((benefit, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <Check style={{ width: '20px', height: '20px', color: '#10b981', flexShrink: 0 }} />
+                <span style={{ fontSize: '15px', fontWeight: 500, color: 'white' }}>{benefit}</span>
+              </div>
             ))}
-          </ul>
+          </div>
+          <div style={{ padding: '16px', backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 'var(--radius-md)' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '12px', color: 'rgba(255,255,255,0.8)', lineHeight: 1.7 }}>
+              <div><span style={{ color: '#8b5cf6' }}>from</span> zerofalse <span style={{ color: '#8b5cf6' }}>import</span> ZerofalseClient</div>
+              <div style={{ marginTop: '8px' }}>zf = ZerofalseClient(api_key=...)</div>
+              <div style={{ marginTop: '8px' }}><span style={{ color: '#8b5cf6' }}>@zf</span>.guard_tool</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <p style={{ fontSize: 'var(--text-sm)', color: 'rgba(255,255,255,0.5)' }}>Already have an account? <Link to="/login" style={{ color: 'white', textDecoration: 'underline' }}>Sign in</Link></p>
         </div>
       </div>
 
-      <div className="flex-1 flex items-center justify-center p-8 bg-white">
-        <div className="w-full max-w-md">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>
-            Create your account
-          </h1>
-          <p className="text-gray-600 mb-8">Start protecting your AI agents in minutes</p>
+      <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '48px', backgroundColor: 'var(--color-bg)' }}>
+        <div style={{ width: '100%', maxWidth: '420px' }}>
+          <h1 style={{ fontSize: '26px', fontWeight: 700, color: 'var(--color-text-primary)', marginBottom: '8px' }}>Create your account</h1>
+          <p style={{ fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)', marginBottom: '32px' }}>Start protecting your AI agents in minutes</p>
 
           {errors.api && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-              <span className="text-sm text-red-800">{errors.api}</span>
+            <div style={{ marginBottom: '24px', padding: '14px 18px', backgroundColor: 'var(--color-danger-bg)', border: '1px solid var(--color-danger-border)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+              <AlertCircle style={{ width: '20px', height: '20px', color: 'var(--color-danger)', flexShrink: 0 }} />
+              <span style={{ fontSize: 'var(--text-sm)', color: 'var(--color-danger)' }}>{errors.api}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5" data-testid="signup-form">
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }} data-testid="signup-form">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
+              <label style={{ display: 'block', fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-text-secondary)', marginBottom: '6px' }}>Full Name</label>
               <input
                 type="text"
                 value={formData.full_name}
                 onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                style={{ width: '100%' }}
                 data-testid="signup-name-input"
               />
-              {errors.full_name && <p className="mt-1 text-sm text-red-600">{errors.full_name}</p>}
+              {errors.full_name && <p style={{ marginTop: '6px', fontSize: 'var(--text-xs)', color: 'var(--color-danger)' }}>{errors.full_name}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Work Email</label>
+              <label style={{ display: 'block', fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-text-secondary)', marginBottom: '6px' }}>Work Email</label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                style={{ width: '100%' }}
                 data-testid="signup-email-input"
               />
-              {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+              {errors.email && <p style={{ marginTop: '6px', fontSize: 'var(--text-xs)', color: 'var(--color-danger)' }}>{errors.email}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-              <input
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                data-testid="signup-password-input"
-              />
+              <label style={{ display: 'block', fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-text-secondary)', marginBottom: '6px' }}>Password</label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  style={{ width: '100%', paddingRight: '40px' }}
+                  data-testid="signup-password-input"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', padding: '4px', backgroundColor: 'transparent', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                >
+                  {showPassword ? <EyeOff style={{ width: '16px', height: '16px', color: 'var(--color-text-muted)' }} /> : <Eye style={{ width: '16px', height: '16px', color: 'var(--color-text-muted)' }} />}
+                </button>
+              </div>
               {formData.password && (
-                <div className="mt-2">
-                  <div className="flex gap-1 mb-1">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <div
-                        key={i}
-                        className={`h-1 flex-1 rounded-full ${
-                          i <= (passwordStrength.level === 'weak' ? 1 : passwordStrength.level === 'medium' ? 3 : 5)
-                            ? `bg-${passwordStrength.color}-500`
-                            : 'bg-gray-200'
-                        }`}
-                      />
+                <div style={{ marginTop: '8px' }}>
+                  <div style={{ display: 'flex', gap: '3px', marginBottom: '6px' }}>
+                    {[1, 2, 3, 4].map((i) => (
+                      <div key={i} style={{ flex: 1, height: '4px', backgroundColor: i <= strengthSegments ? strengthColors[passwordStrength.level] : 'var(--color-surface-2)', borderRadius: 'var(--radius-full)', transition: 'var(--transition-base)' }} />
                     ))}
                   </div>
-                  <p className="text-xs text-gray-600">
-                    8+ chars, 1 uppercase, 1 number
-                  </p>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: 'var(--text-xs)', color: strengthColors[passwordStrength.level], fontWeight: 600, textTransform: 'capitalize' }}>{passwordStrength.level}</span>
+                    <span style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)' }}>8+ chars, 1 uppercase, 1 number</span>
+                  </div>
                 </div>
               )}
-              {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password}</p>}
+              {errors.password && <p style={{ marginTop: '6px', fontSize: 'var(--text-xs)', color: 'var(--color-danger)' }}>{errors.password}</p>}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Organization Name</label>
+              <label style={{ display: 'block', fontSize: 'var(--text-sm)', fontWeight: 500, color: 'var(--color-text-secondary)', marginBottom: '6px' }}>Organization Name</label>
               <input
                 type="text"
                 value={formData.org_name}
                 onChange={(e) => setFormData({ ...formData, org_name: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                style={{ width: '100%' }}
                 data-testid="signup-org-input"
               />
-              {errors.org_name && <p className="mt-1 text-sm text-red-600">{errors.org_name}</p>}
+              {errors.org_name && <p style={{ marginTop: '6px', fontSize: 'var(--text-xs)', color: 'var(--color-danger)' }}>{errors.org_name}</p>}
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 text-base font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-50"
+              style={{ width: '100%', padding: '10px 20px', marginTop: '4px', fontSize: 'var(--text-sm)', fontWeight: 600, color: 'white', backgroundColor: 'var(--color-brand)', border: 'none', borderRadius: 'var(--radius-md)', cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.5 : 1, boxShadow: 'var(--shadow-brand)', transition: 'var(--transition-fast)' }}
+              onMouseEnter={(e) => !loading && (e.currentTarget.style.backgroundColor = 'var(--color-brand-dark)')}
+              onMouseLeave={(e) => !loading && (e.currentTarget.style.backgroundColor = 'var(--color-brand)')}
+              className="btn-press"
               data-testid="signup-submit-btn"
             >
               {loading ? 'Creating account...' : 'Create Account'}
             </button>
           </form>
 
-          <p className="mt-6 text-center text-sm text-gray-600">
+          <p style={{ marginTop: '16px', fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', textAlign: 'center' }}>By creating an account you agree to our <a href="#" style={{ color: 'var(--color-text-muted)', textDecoration: 'underline' }}>Terms</a> and <a href="#" style={{ color: 'var(--color-text-muted)', textDecoration: 'underline' }}>Privacy Policy</a></p>
+
+          <p style={{ marginTop: '24px', textAlign: 'center', fontSize: 'var(--text-sm)', color: 'var(--color-text-secondary)' }}>
             Already have an account?{' '}
-            <Link to="/login" className="font-semibold text-blue-600 hover:text-blue-700">
+            <Link to="/login" style={{ fontWeight: 600, color: 'var(--color-brand)', textDecoration: 'none' }}>
               Sign in
             </Link>
           </p>
