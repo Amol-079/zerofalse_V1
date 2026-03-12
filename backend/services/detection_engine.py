@@ -78,7 +78,7 @@ class DetectionEngine:
             (re.compile(r'TRUNCATE\s+TABLE', re.IGNORECASE), 0.90, "SQL table truncate"),
             (re.compile(r"(?:1=1|OR\s+1|'\\s*OR\\s*')", re.IGNORECASE), 0.90, "SQL injection pattern"),
             (re.compile(r'UNION\s+SELECT', re.IGNORECASE), 0.90, "SQL union injection"),
-            (re.compile(r'\\.\\./|\\.\\.\\\\'re.IGNORECASE), 0.90, "Path traversal"),
+            (re.compile(r'\.\./|\.\.\\', re.IGNORECASE), 0.90, "Path traversal"),
             (re.compile(r'/etc/passwd|/etc/shadow', re.IGNORECASE), 0.90, "Sensitive file access"),
             (re.compile(r'base64.*decode', re.IGNORECASE), 0.85, "Base64 decode in arguments"),
             (re.compile(r'\\beval\\s*\\(', re.IGNORECASE), 0.90, "Eval execution"),
