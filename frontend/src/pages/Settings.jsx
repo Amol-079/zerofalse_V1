@@ -60,12 +60,12 @@ export default function Settings() {
   ];
 
   return (
-    <div className=\"space-y-6\" data-testid=\"settings-page\">
+    <div className="space-y-6" data-testid="settings-page">
       <div>
-        <h1 className=\"text-3xl font-bold text-gray-900\" style={{ fontFamily: 'Syne, sans-serif' }}>
+        <h1 className="text-3xl font-bold text-gray-900" style={{ fontFamily: 'Syne, sans-serif' }}>
           Settings
         </h1>
-        <p className=\"text-gray-600 mt-1\">Manage your account and preferences</p>
+        <p className="text-gray-600 mt-1">Manage your account and preferences</p>
       </div>
 
       <div className=\"flex gap-6\">
