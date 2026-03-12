@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .config import get_settings
-from .database import connect_to_mongo, close_mongo_connection
-from .routers import auth, scan, dashboard, api_keys, alerts, webhooks
+from config import get_settings
+from database import connect_to_mongo, close_mongo_connection
+from routers import auth, scan, dashboard, api_keys, alerts, webhooks
 import logging
 
 logging.basicConfig(
