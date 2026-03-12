@@ -83,7 +83,7 @@ class DetectionEngine:
             (re.compile(r'base64.*decode', re.IGNORECASE), 0.85, "Base64 decode in arguments"),
             (re.compile(r'\beval\s*\(', re.IGNORECASE), 0.90, "Eval execution"),
             (re.compile(r'__import__', re.IGNORECASE), 0.90, "Dynamic import"),
-            (re.compile(r'os\\.system|subprocess', re.IGNORECASE), 0.90, "System command execution"),
+            (re.compile(r'os\.system|subprocess', re.IGNORECASE), 0.90, "System command execution"),
         ]
         
         # Credential patterns
