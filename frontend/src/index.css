@@ -6,21 +6,40 @@
 
 @layer base {
   :root {
-    --navy: #0d1f3c;
-    --blue: #1a56ff;
-    --blue-dark: #0035e6;
-    --blue-light: #e8eeff;
+    --brand-50: #eff6ff;
+    --brand-100: #dbeafe;
+    --brand-200: #bfdbfe;
+    --brand-500: #3b82f6;
+    --brand-600: #2563eb;
+    --brand-700: #1d4ed8;
+    --brand-800: #1e3a8a;
+    --navy: #0f172a;
+    --navy-2: #1e293b;
+    --navy-3: #334155;
     --surface: #f8fafc;
-    --surface-2: #f0f4ff;
+    --surface-2: #f1f5f9;
     --white: #ffffff;
     --border: #e2e8f0;
-    --text-primary: #0d1f3c;
-    --text-secondary: #475569;
-    --text-muted: #94a3b8;
+    --border-2: #cbd5e1;
+    --text-1: #0f172a;
+    --text-2: #334155;
+    --text-3: #64748b;
+    --text-4: #94a3b8;
     --success: #10b981;
+    --success-bg: #d1fae5;
     --warning: #f59e0b;
+    --warning-bg: #fef3c7;
     --danger: #ef4444;
-    --danger-light: #fef2f2;
+    --danger-bg: #fee2e2;
+    --purple: #8b5cf6;
+    --purple-bg: #ede9fe;
+    --teal: #14b8a6;
+    --teal-bg: #ccfbf1;
+    
+    --shadow-1: 0 1px 2px rgba(0,0,0,0.05);
+    --shadow-2: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+    --shadow-3: 0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.06);
+    --shadow-4: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
 
     --background: 0 0% 100%;
     --foreground: 222 47% 11%;
@@ -38,8 +57,6 @@
     --accent-foreground: 222 47% 11%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
     --ring: 221 83% 53%;
     --radius: 0.75rem;
   }
