@@ -24,7 +24,7 @@ export const Sidebar = () => {
     { path: '/dashboard', icon: Home, label: 'Overview' },
     { path: '/scan-logs', icon: FileText, label: 'Scan Logs' },
     { path: '/alerts', icon: Bell, label: 'Alerts', badge: alertCount },
-    { path: '/api-keys', icon: Key, label: 'API Keys' },
+    { path: '/keys', icon: Key, label: 'API Keys' },
     { path: '/settings', icon: Settings, label: 'Settings' },
   ];
 

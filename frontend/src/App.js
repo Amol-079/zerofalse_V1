@@ -56,7 +56,7 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/scan-logs" element={<ScanLogs />} />
             <Route path="/alerts" element={<Alerts />} />
-            <Route path="/api-keys" element={<APIKeys />} />
+            <Route path="/keys" element={<APIKeys />} />
             <Route path="/settings" element={<Settings />} />
           </Route>
         </Routes>
