@@ -1,67 +1,161 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Home, FileText, Bell, Key, Settings, Shield } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import client from '../api/client';
 
 export const Sidebar = () => {
   const { org } = useAuth();
+  const [alertCount, setAlertCount] = useState(0);
+
+  useEffect(() => {
+    const fetchAlertCount = async () => {
+      try {
+        const response = await client.get('/api/v1/dashboard/stats');
+        setAlertCount(response.data.open_alerts || 0);
+      } catch (error) {
+        console.error('Error fetching alert count:', error);
+      }
+    };
+    fetchAlertCount();
+  }, []);
 
   const navItems = [
     { path: '/dashboard', icon: Home, label: 'Overview' },
     { path: '/scan-logs', icon: FileText, label: 'Scan Logs' },
-    { path: '/alerts', icon: Bell, label: 'Alerts' },
+    { path: '/alerts', icon: Bell, label: 'Alerts', badge: alertCount },
     { path: '/api-keys', icon: Key, label: 'API Keys' },
     { path: '/settings', icon: Settings, label: 'Settings' },
   ];
 
-  const usagePercent = org ? Math.round((org.scan_count_month / org.scan_limit_month) * 100) : 0;
+  const usagePercent = org ? Math.min((org.scan_count_month / org.scan_limit_month) * 100, 100) : 0;
+  let usageColor = 'var(--color-brand)';
+  if (usagePercent > 95) usageColor = 'var(--color-danger)';
+  else if (usagePercent > 80) usageColor = 'var(--color-warning)';
 
   return (
-    <aside className="w-60 bg-white border-r border-gray-200 flex flex-col" data-testid="sidebar">
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-            <Shield className="w-5 h-5 text-white" />
-          </div>
-          <span className="text-xl font-bold" style={{ fontFamily: 'Syne, sans-serif' }}>Zerofalse</span>
+    <aside 
+      className="flex flex-col" 
+      style={{ 
+        width: '240px', 
+        backgroundColor: 'var(--color-bg)', 
+        borderRight: '1px solid var(--color-border)',
+        height: '100vh'
+      }}
+      data-testid="sidebar"
+    >
+      <div 
+        className="flex items-center gap-2"
+        style={{ 
+          height: '64px', 
+          padding: '0 20px',
+          borderBottom: '1px solid var(--color-border)'
+        }}
+      >
+        <div 
+          className="flex items-center justify-center"
+          style={{ 
+            width: '20px', 
+            height: '20px',
+            backgroundColor: 'var(--color-brand)',
+            borderRadius: 'var(--radius-md)'
+          }}
+        >
+          <Shield style={{ width: '14px', height: '14px', color: 'white' }} />
         </div>
+        <span style={{ fontFamily: 'var(--font-sans)', fontSize: '18px', fontWeight: 700, color: 'var(--color-text-primary)' }}>
+          Zerofalse
+        </span>
       </div>
 
-      <nav className="flex-1 p-4 space-y-1">
+      <nav style={{ padding: '12px 8px', flex: 1 }}>
         {navItems.map((item) => {
           const Icon = item.icon;
           return (
             <NavLink
               key={item.path}
               to={item.path}
-              className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                  isActive
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-50'
-                }`
-              }
+              className={({ isActive }) => isActive ? 'nav-item-active' : 'nav-item'}
               data-testid={`nav-${item.label.toLowerCase().replace(' ', '-')}`}
+              style={({ isActive }) => ({
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                padding: '9px 12px',
+                borderRadius: 'var(--radius-md)',
+                fontSize: 'var(--text-sm)',
+                fontWeight: isActive ? 600 : 500,
+                color: isActive ? 'var(--color-brand)' : 'var(--color-text-secondary)',
+                backgroundColor: isActive ? 'var(--color-brand-subtle)' : 'transparent',
+                marginBottom: '2px',
+                cursor: 'pointer',
+                transition: 'var(--transition-fast)',
+                textDecoration: 'none',
+                position: 'relative'
+              })}
             >
-              <Icon className="w-5 h-5" />
-              {item.label}
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <div style={{
+                      position: 'absolute',
+                      left: 0,
+                      width: '3px',
+                      height: '20px',
+                      backgroundColor: 'var(--color-brand)',
+                      borderRadius: '0 2px 2px 0'
+                    }} />
+                  )}
+                  <Icon style={{ width: '20px', height: '20px', color: isActive ? 'var(--color-brand)' : 'var(--color-text-secondary)' }} />
+                  <span>{item.label}</span>
+                  {item.badge && item.badge > 0 && (
+                    <span style={{
+                      position: 'absolute',
+                      right: '12px',
+                      height: '18px',
+                      minWidth: '18px',
+                      padding: '0 5px',
+                      backgroundColor: 'var(--color-danger)',
+                      color: 'white',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      borderRadius: 'var(--radius-full)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      {item.badge}
+                    </span>
+                  )}
+                </>
+              )}
             </NavLink>
           );
         })}
       </nav>
 
       {org && (
-        <div className="p-4 border-t border-gray-200">
-          <div className="text-xs font-medium text-gray-500 mb-2">Usage This Month</div>
-          <div className="flex items-center justify-between text-xs text-gray-700 mb-1.5">
-            <span>{org.scan_count_month?.toLocaleString() || 0}</span>
-            <span>{org.scan_limit_month?.toLocaleString() || 0}</span>
+        <div style={{ padding: '16px 20px', borderTop: '1px solid var(--color-border)' }}>
+          <div style={{ fontSize: 'var(--text-xs)', fontWeight: 600, color: 'var(--color-text-secondary)', marginBottom: '6px' }}>
+            Monthly Scans
           </div>
-          <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-blue-600 transition-all duration-300"
-              style={{ width: `${Math.min(usagePercent, 100)}%` }}
-            />
+          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-text-muted)', marginBottom: '6px' }}>
+            {org.scan_count_month?.toLocaleString() || 0} of {org.scan_limit_month?.toLocaleString() || 0} used
+          </div>
+          <div style={{ 
+            height: '6px', 
+            backgroundColor: 'var(--color-surface-2)', 
+            borderRadius: 'var(--radius-full)', 
+            overflow: 'hidden',
+            marginTop: '6px'
+          }}>
+            <div style={{ 
+              width: `${usagePercent}%`, 
+              height: '100%', 
+              backgroundColor: usageColor, 
+              borderRadius: 'var(--radius-full)',
+              transition: 'var(--transition-base)'
+            }} />
           </div>
         </div>
       )}
