@@ -396,7 +396,7 @@ const Dashboard = () => {
                 No scans yet
               </p>
               <button
-                onClick={() => navigate('/api-keys')}
+                onClick={() => navigate('/keys')}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
