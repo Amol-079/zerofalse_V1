@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, AuthContext } from './context/AuthContext';
+import { ThemeProvider } from './hooks/useTheme';
 import { Layout } from './components/Layout';
 import Landing from './pages/Landing';
 import Signup from './pages/Signup';
@@ -12,6 +13,8 @@ import ScanLogs from './pages/ScanLogs';
 import Alerts from './pages/Alerts';
 import APIKeys from './pages/APIKeys';
 import Settings from './pages/Settings';
+import AIConfig from './pages/AIConfig';
+import Docs from './pages/Docs';
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = React.useContext(AuthContext);
@@ -43,25 +46,29 @@ const PublicRoute = ({ children }) => {
 
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
-          <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
-          <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
-          
-          <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/scan-logs" element={<ScanLogs />} />
-            <Route path="/alerts" element={<Alerts />} />
-            <Route path="/keys" element={<APIKeys />} />
-            <Route path="/settings" element={<Settings />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Landing />} />
+            <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
+            <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+            <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
+            <Route path="/onboarding" element={<ProtectedRoute><Onboarding /></ProtectedRoute>} />
+            
+            <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/scan-logs" element={<ScanLogs />} />
+              <Route path="/alerts" element={<Alerts />} />
+              <Route path="/keys" element={<APIKeys />} />
+              <Route path="/ai-config" element={<AIConfig />} />
+              <Route path="/docs" element={<Docs />} />
+              <Route path="/settings" element={<Settings />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 
