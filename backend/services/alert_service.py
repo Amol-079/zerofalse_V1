@@ -1,7 +1,7 @@
 from typing import Optional
-from ..database import get_database
-from ..models.alert import Alert
-from ..services.detection_engine import ScanResult
+from database import get_database
+from models.alert import Alert
+from services.detection_engine import ScanResult
 from datetime import datetime, timezone, timedelta
 
 async def create_alert_if_needed(org_id: str, scan_event_id: str, scan_result: ScanResult, 

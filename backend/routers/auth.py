@@ -1,16 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from ..schemas.auth import (
+from schemas.auth import (
     RegisterRequest, LoginRequest, TokenResponse, RefreshRequest,
     ForgotPasswordRequest, ResetPasswordRequest, PasswordChangeRequest
 )
-from ..models.user import User, UserResponse
-from ..models.organization import Organization
-from ..services.auth_service import (
+from models.user import User, UserResponse
+from models.organization import Organization
+from services.auth_service import (
     hash_password, verify_password, validate_password_strength,
     create_access_token, create_refresh_token, get_current_user
 )
-from ..database import get_database
-from ..middleware.rate_limit import rate_limit_auth
+from database import get_database
+from middleware.rate_limit import rate_limit_auth
 from datetime import datetime, timedelta, timezone
 import secrets
 import hashlib

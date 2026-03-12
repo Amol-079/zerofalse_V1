@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
-from ..services.auth_service import get_current_user
-from ..database import get_database
-from ..models.api_key import APIKey, APIKeyResponse
+from services.auth_service import get_current_user
+from database import get_database
+from models.api_key import APIKey, APIKeyResponse
 import secrets
 import hashlib
 from datetime import datetime, timezone

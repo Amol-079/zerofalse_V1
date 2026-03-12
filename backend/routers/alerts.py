@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from pydantic import BaseModel
-from ..services.auth_service import get_current_user
-from ..database import get_database
-from ..models.alert import AlertResponse
+from services.auth_service import get_current_user
+from database import get_database
+from models.alert import AlertResponse
 from datetime import datetime, timezone
 from typing import Optional, Literal, List
 

@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, Query
-from ..schemas.dashboard import DashboardStats, ThreatBreakdown, DailyTrend, AgentBreakdown
-from ..services.auth_service import get_current_user
-from ..database import get_database
-from ..models.scan_event import ScanEventResponse
+from schemas.dashboard import DashboardStats, ThreatBreakdown, DailyTrend, AgentBreakdown
+from services.auth_service import get_current_user
+from database import get_database
+from models.scan_event import ScanEventResponse
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Literal, List
 

@@ -1,5 +1,5 @@
 from fastapi import Header, HTTPException, status, Depends
-from ..database import get_database
+from database import get_database
 import hashlib
 from datetime import datetime, timezone
 

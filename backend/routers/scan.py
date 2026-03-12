@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from ..schemas.scan import ToolCallScanRequest, PromptScanRequest, ScanResponse, BatchScanRequest
-from ..middleware.api_key_auth import get_api_key_org
-from ..middleware.rate_limit import rate_limit_scan
-from ..services.scan_service import process_scan, process_prompt_scan
-from ..services.alert_service import create_alert_if_needed
-from ..database import get_database
+from schemas.scan import ToolCallScanRequest, PromptScanRequest, ScanResponse, BatchScanRequest
+from middleware.api_key_auth import get_api_key_org
+from middleware.rate_limit import rate_limit_scan
+from services.scan_service import process_scan, process_prompt_scan
+from services.alert_service import create_alert_if_needed
+from database import get_database
 from datetime import datetime, timezone
 
 router = APIRouter(prefix="/scan", tags=["scan"], dependencies=[Depends(rate_limit_scan)])

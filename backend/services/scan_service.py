@@ -1,6 +1,6 @@
-from ..database import get_database
-from ..models.scan_event import ScanEvent
-from ..services.detection_engine import detection_engine, ScanResult
+from database import get_database
+from models.scan_event import ScanEvent
+from services.detection_engine import detection_engine, ScanResult
 import hashlib
 import json
 from datetime import datetime, timezone
