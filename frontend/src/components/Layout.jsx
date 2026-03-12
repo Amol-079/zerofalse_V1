@@ -5,7 +5,7 @@ import { Topbar } from './Topbar';
 
 export const Layout = () => {
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen" style={{ backgroundColor: 'var(--color-surface)' }}>
       <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Topbar />
