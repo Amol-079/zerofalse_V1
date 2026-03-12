@@ -6,56 +6,38 @@
 
 @layer base {
   :root {
-    /* Brand Colors */
     --color-brand: #1a56ff;
     --color-brand-dark: #0035e6;
     --color-brand-light: #eff4ff;
     --color-brand-subtle: #e8eeff;
-
-    /* Background Colors */
     --color-bg: #ffffff;
     --color-surface: #f8fafc;
     --color-surface-2: #f1f5f9;
     --color-surface-raised: #ffffff;
-
-    /* Border Colors */
     --color-border: #e2e8f0;
     --color-border-strong: #cbd5e1;
-
-    /* Text Colors */
     --color-text-primary: #0f172a;
     --color-text-secondary: #475569;
     --color-text-muted: #94a3b8;
     --color-text-inverse: #ffffff;
-
-    /* Navy Colors */
     --color-navy: #0d1f3c;
     --color-navy-mid: #1e3a5f;
     --color-navy-light: #2d4a7a;
-
-    /* Semantic Colors */
     --color-success: #10b981;
     --color-success-bg: #ecfdf5;
     --color-success-border: #a7f3d0;
-
     --color-warning: #f59e0b;
     --color-warning-bg: #fffbeb;
     --color-warning-border: #fde68a;
-
     --color-danger: #ef4444;
     --color-danger-bg: #fef2f2;
     --color-danger-border: #fecaca;
-
     --color-critical: #dc2626;
     --color-critical-bg: #fef2f2;
-
     --color-info: #3b82f6;
     --color-info-bg: #eff6ff;
-
-    /* Typography */
     --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
-
     --text-xs: 11px;
     --text-sm: 13px;
     --text-base: 15px;
@@ -66,31 +48,23 @@
     --text-4xl: 36px;
     --text-5xl: 48px;
     --text-6xl: 60px;
-
-    /* Border Radius */
     --radius-sm: 6px;
     --radius-md: 10px;
     --radius-lg: 14px;
     --radius-xl: 20px;
     --radius-full: 9999px;
-
-    /* Shadows */
     --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
     --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -2px rgba(0,0,0,0.05);
     --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.05);
     --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
     --shadow-brand: 0 4px 14px rgba(26,86,255,0.25);
-
-    /* Transitions */
     --transition-fast: all 0.12s ease;
     --transition-base: all 0.18s ease;
     --transition-slow: all 0.28s ease;
   }
-
   * {
-    @apply border-border;
+    border-color: var(--color-border);
   }
-  
   body {
     font-family: var(--font-sans);
     color: var(--color-text-primary);
@@ -100,33 +74,49 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
-
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-sans);
     font-weight: 700;
     color: var(--color-text-primary);
   }
-
   code, pre {
     font-family: var(--font-mono);
+  }
+  input, select, textarea {
+    background-color: var(--color-bg);
+    border: 1.5px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    padding: 10px 14px;
+    font-size: var(--text-sm);
+    color: var(--color-text-primary);
+    transition: var(--transition-fast);
+  }
+  input::placeholder, select::placeholder, textarea::placeholder {
+    color: var(--color-text-muted);
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--color-brand);
+    box-shadow: 0 0 0 3px rgba(26,86,255,0.12);
+    outline: none;
+  }
+  button {
+    font-family: var(--font-sans);
+    cursor: pointer;
+    transition: var(--transition-fast);
   }
 }
 
 @layer utilities {
-  /* Skeleton Loader Animation */
   @keyframes skeleton-shimmer {
     0% { background-position: 200% 0; }
     100% { background-position: -200% 0; }
   }
-
   .skeleton {
     background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
     background-size: 200% 100%;
     animation: skeleton-shimmer 1.5s ease-in-out infinite;
     border-radius: var(--radius-sm);
   }
-
-  /* Fade In Up Animation */
   @keyframes fadeInUp {
     from {
       opacity: 0;
@@ -137,12 +127,9 @@
       transform: translateY(0);
     }
   }
-
   .animate-fadeInUp {
     animation: fadeInUp 0.4s ease-out forwards;
   }
-
-  /* Float Animation */
   @keyframes float {
     0%, 100% {
       transform: perspective(1000px) rotateY(-4deg) rotateX(2deg) translateY(0);
@@ -151,19 +138,45 @@
       transform: perspective(1000px) rotateY(-4deg) rotateX(2deg) translateY(-8px);
     }
   }
-
   .animate-float {
     animation: float 5s ease-in-out infinite;
   }
-
-  /* Button Press Effect */
   .btn-press:active {
     transform: scale(0.98);
   }
-
-  /* Page Transition */
   .page-transition {
     animation: fadeInUp 0.2s ease-out;
+  }
+}
+
+@layer base {
+  [data-debug-wrapper="true"] {
+    display: contents !important;
+  }
+  [data-debug-wrapper="true"] > * {
+    margin-left: inherit;
+    margin-right: inherit;
+    margin-top: inherit;
+    margin-bottom: inherit;
+    padding-left: inherit;
+    padding-right: inherit;
+    padding-top: inherit;
+    padding-bottom: inherit;
+    column-gap: inherit;
+    row-gap: inherit;
+    gap: inherit;
+    border-left-width: inherit;
+    border-right-width: inherit;
+    border-top-width: inherit;
+    border-bottom-width: inherit;
+    border-left-style: inherit;
+    border-right-style: inherit;
+    border-top-style: inherit;
+    border-bottom-style: inherit;
+    border-left-color: inherit;
+    border-right-color: inherit;
+    border-top-color: inherit;
+    border-bottom-color: inherit;
   }
 }
 
